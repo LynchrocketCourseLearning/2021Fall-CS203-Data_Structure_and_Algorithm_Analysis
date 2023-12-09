@@ -1,0 +1,175 @@
+static class node {
+        long key;
+        long height;
+        node parent;
+        node right;
+        node left;
+
+        public node(long key) {
+            this.key = key;
+            this.height = 0;
+            this.parent = null;
+            this.right = null;
+            this.left = null;
+        }
+    }
+
+    static class AVLTree {
+        node root;
+        long size;
+
+        public AVLTree() {
+            this.root = null;
+            this.size = 0;
+        }
+
+        public long Height(node n) {
+            if (n != null) return n.height;
+            return 0;
+        }
+
+        public long Factor(node n) {
+            return (Height(n.left) - Height(n.right));
+        }
+
+        public boolean isBalanced(node n) {
+            if (n == null) return true;
+            long fac = Math.abs(Factor(n));
+            if (fac > 1) return false;
+            return (isBalanced(n.right) && isBalanced(n.left));
+        }
+
+        public void rightRotate(node y) {
+            node x = y.left;
+            node tmp = x.right;
+            node parent = y.parent;
+
+            x.right = y;
+            x.parent = parent;
+            y.left = tmp;
+            tmp.parent = y;
+
+            y.height = 1 + Math.max(Height(y.left), Height(y.right));
+            x.height = 1 + Math.max(Height(x.left), Height(x.right));
+        }
+
+        public void leftRotate(node y) {
+            node x = y.right;
+            node tmp = x.left;
+            node parent = y.parent;
+
+            x.left = y;
+            x.parent = parent;
+            y.right = tmp;
+            tmp.parent = y;
+
+            y.height = 1 + Math.max(Height(y.left), Height(y.right));
+            x.height = 1 + Math.max(Height(x.left), Height(x.right));
+        }
+
+        public void reBalance(node n) {
+            if (Factor(n) > 1) {
+                if (Factor(n.left) < 0) {
+                    leftRotate(n.left);
+                }
+                rightRotate(n);
+            } else if (Factor(n) < -1) {
+                if (Factor(n.right) > 0) {
+                    rightRotate(n.right);
+                }
+                leftRotate(n);
+            }
+        }
+
+        public void add(long key) {
+            add(this.root, key);
+        }
+
+        public void add(node n, long key) {
+            node cur = n;
+            if (cur == null) {
+                cur = new node(key);
+            } else {
+                while (true) {
+                    if (key < cur.key) {
+                        if (cur.left != null) cur = cur.left;
+                        else {
+                            node tmp = new node(key);
+                            cur.left = tmp;
+                            tmp.parent = cur;
+                            break;
+                        }
+                    } else {
+                        if (cur.right != null) cur = cur.right;
+                        else {
+                            node tmp = new node(key);
+                            cur.right = tmp;
+                            tmp.parent = cur;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        public node search(long key) {
+            return search(this.root, key);
+        }
+
+        public node search(node n, long key) {
+            node cur = n;
+            while (cur != null && (cur.left != null || cur.right != null)) {
+                if (key < cur.key) cur = cur.left;
+                else if (key > cur.key) cur = cur.right;
+                else break;
+            }
+            return cur;
+        }
+
+        public node minNode(node n) {
+            node cur = n;
+            while (cur.left != null) {
+                cur = cur.left;
+            }
+            return cur;
+        }
+
+        public node maxNode(node n) {
+            node cur = n;
+            while (cur.right != null) {
+                cur = cur.right;
+            }
+            return cur;
+        }
+
+        public void delete(long key) {
+            delete(this.root, key);
+        }
+
+        public void delete(node n, long key) {
+            node cur = search(n, key);
+            if (cur.left == null && cur.right == null) {
+                if (cur.parent.left == cur) cur.parent.left = null;
+                if (cur.parent.right == cur) cur.parent.right = null;
+            } else if (cur.right != null) {
+                node suc = minNode(cur.right);
+                cur.key = suc.key;
+                if (suc.left == null && suc.right == null) {
+                    suc.parent.left = null;
+                } else {
+                    cur.parent.left = suc.right;
+                    suc.right.parent = cur.parent;
+                }
+            } else {
+                if (cur.parent.left == cur) {
+                    cur.parent.left = cur.left;
+                    cur.left.parent = cur.parent;
+                }
+                if (cur.parent.right == cur) {
+                    cur.parent.right = cur.left;
+                    cur.left.parent = cur.parent;
+                }
+            }
+        }
+
+    }
